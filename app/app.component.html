@@ -1,0 +1,253 @@
+<div>
+  <clr-wizard #wizard [(clrWizardOpen)]="opened" [clrWizardSize]="'xl'">
+    <clr-wizard-title>Create Multi-site MSSQL Always-on Group</clr-wizard-title>
+
+    <clr-wizard-button [type]="'cancel'">CANCEL</clr-wizard-button>
+    <clr-wizard-button [type]="'previous'">PREVIOUS</clr-wizard-button>
+    <clr-wizard-button [type]="'next'">NEXT</clr-wizard-button>
+    <clr-wizard-button [type]="'finish'">FINISH</clr-wizard-button>
+
+    <clr-wizard-page>
+      <ng-template clrPageTitle>General</ng-template>
+      <form #generalForm="ngForm" clrForm clrLayout="horizontal">
+        <clr-input-container>
+          <label for="vAppName" class="group-label">Name</label>
+          <input clrInput type="text" id="vAppName" required />
+          <clr-control-helper>vApp name</clr-control-helper>
+          <clr-control-error>vApp name is invalid!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container>
+          <label for="numCpus" class="group-label">Number of CPUs</label>
+          <input
+            clrInput
+            type="number"
+            id="numCpus"
+            min="2"
+            max="64"
+            required
+          />
+          <clr-control-helper
+            >CPU count allocated for the deployed machines</clr-control-helper
+          >
+          <clr-control-error>Number of cpus is invalid!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container>
+          <label for="memoryGB" class="group-label">Memory in GB</label>
+          <input clrInput type="number" id="memoryGB" required />
+          <clr-control-helper
+            >Memory allocated for the deployed machines</clr-control-helper
+          >
+          <clr-control-error>Memory is invalid!</clr-control-error>
+        </clr-input-container>
+        <clr-select-container>
+          <label for="windowsServerVersion" class="group-label"
+            >Windows Server Version</label
+          >
+          <select
+            clrSelect
+            id="windowsServerVersion"
+            name="windowsServerVersion"
+            required
+          >
+            <option value="2019">2019</option>
+          </select>
+          <clr-control-helper
+            >The version of the Windows Server to deploy
+            MSSQL.</clr-control-helper
+          >
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-select-container>
+        <clr-select-container>
+          <label for="sqlServerVersion" class="group-label"
+            >MSSQL Server Version</label
+          >
+          <select
+            clrSelect
+            id="sqlServerVersion"
+            name="sqlServerVersion"
+            required
+          >
+            <option value="2017">2017</option>
+            <option value="2019">2019</option>
+          </select>
+          <clr-control-helper
+            >The version of MSSQL Server to deploy.</clr-control-helper
+          >
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-select-container>
+      </form>
+    </clr-wizard-page>
+    <clr-wizard-page>
+      <ng-template clrPageTitle>Placement</ng-template>
+      <form #placementForm="ngForm" clrForm clrLayout="horizontal">
+        <clr-select-container>
+          <label for="orgVdcName" class="group-label"
+            >Main Organization VDC</label
+          >
+          <select
+            clrSelect
+            name="orgVdcName"
+            (change)="loadOrganizationVdcNetworks()"
+          >
+            <option value="" selected disabled hidden></option>
+            <option [value]="orgVdc.name" *ngFor="let orgVdc of orgVdcs">
+              {{ orgVdc.name }}
+            </option>
+          </select>
+          <clr-control-helper
+            >Select organization VDC to deploy in</clr-control-helper
+          >
+          <clr-control-error
+            >Organization VDC name is invalid!</clr-control-error
+          >
+        </clr-select-container>
+        <clr-select-container>
+          <label for="orgVdcNetworkName" class="group-label"
+            >Main Organization VDC Network</label
+          >
+          <select clrSelect name="orgVdcNetworkName">
+            <option value="" selected disabled hidden></option>
+            <option
+              [value]="orgVdcNetwork.name"
+              *ngFor="let orgVdcNetwork of orgVdcNetworks"
+            >
+              {{ orgVdcNetwork.name }}
+            </option>
+          </select>
+          <clr-control-helper
+            >Select organization VDC network to deploy in</clr-control-helper
+          >
+          <clr-control-error
+            >Organization VDC network name is invalid!</clr-control-error
+          >
+        </clr-select-container>
+        <clr-select-container>
+          <label for="orgVdcName" class="group-label"
+            >DR Organization VDC</label
+          >
+          <select
+            clrSelect
+            name="orgVdcName"
+            (change)="loadOrganizationVdcNetworks()"
+          >
+            <option value="" selected disabled hidden></option>
+            <option [value]="orgVdc.name" *ngFor="let orgVdc of orgVdcs">
+              {{ orgVdc.name }}
+            </option>
+          </select>
+          <clr-control-helper
+            >Select organization VDC to deploy in</clr-control-helper
+          >
+          <clr-control-error
+            >Organization VDC name is invalid!</clr-control-error
+          >
+        </clr-select-container>
+        <clr-select-container>
+          <label for="orgVdcNetworkName" class="group-label"
+            >DR Organization VDC Network</label
+          >
+          <select clrSelect name="orgVdcNetworkName">
+            <option value="" selected disabled hidden></option>
+            <option
+              [value]="orgVdcNetwork.name"
+              *ngFor="let orgVdcNetwork of orgVdcNetworks"
+            >
+              {{ orgVdcNetwork.name }}
+            </option>
+          </select>
+          <clr-control-helper
+            >Select organization VDC network to deploy in</clr-control-helper
+          >
+          <clr-control-error
+            >Organization VDC network name is invalid!</clr-control-error
+          >
+        </clr-select-container>
+        <clr-input-container>
+          <label for="baseName" class="group-label">Base Name</label>
+          <input clrInput type="text" id="baseName" required />
+          <clr-control-helper
+            >Base name of the nodes in the cluster</clr-control-helper
+          >
+          <clr-control-error>Base name is invalid!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container [hidden]="true">
+          <label for="nodeCount" class="group-label">Number of nodes</label>
+          <input clrInput type="number" id="nodeCount" min="2" required />
+          <clr-control-helper
+            >Number of the nodes in the cluster</clr-control-helper
+          >
+          <clr-control-error>Number of nodes is invalid!</clr-control-error>
+        </clr-input-container>
+      </form>
+    </clr-wizard-page>
+    <clr-wizard-page>
+      <ng-template clrPageTitle>Failover Cluster</ng-template>
+      <form #failoverClusterForm="ngForm" clrForm clrLayout="horizontal">
+        <clr-input-container>
+          <label for="clusterName" class="group-label">Cluster Name</label>
+          <input
+            clrInput
+            type="text"
+            name="clusterName"
+            id="clusterName"
+            required
+          />
+          <clr-control-helper>Name of the WSFC cluster.</clr-control-helper>
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container>
+          <label for="quorumDiskSize" class="group-label"
+            >Quorum Disk Size</label
+          >
+          <input
+            clrInput
+            type="number"
+            name="quorumDiskSize"
+            id="quorumDiskSize"
+            required
+          />
+          <clr-control-helper
+            >The size of the quorum disk that will be
+            created.</clr-control-helper
+          >
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-input-container>
+      </form>
+    </clr-wizard-page>
+    <clr-wizard-page>
+      <ng-template clrPageTitle>Always-On Group</ng-template>
+      <form #alwaysOnForm="ngForm" clrForm clrLayout="horizontal">
+        <clr-input-container>
+          <label for="aagName" class="group-label">AAG Name</label>
+          <input clrInput type="text" name="aagName" id="aagName" required />
+          <clr-control-helper
+            >The name of the Always On Availability Group that will be
+            created.</clr-control-helper
+          >
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container>
+          <label for="databaseName" class="group-label">Database Name</label>
+          <input
+            clrInput
+            type="text"
+            name="databaseName"
+            id="databaseName"
+            required
+          />
+          <clr-control-helper
+            >The name of the database that will be created.</clr-control-helper
+          >
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-input-container>
+
+        <clr-input-container>
+          <label for="sqlPort" class="group-label">SQL Port</label>
+          <input clrInput type="number" name="sqlPort" id="sqlPort" required />
+          <clr-control-helper>SQL Port</clr-control-helper>
+          <clr-control-error>This field is mandatory!</clr-control-error>
+        </clr-input-container>
+      </form>
+    </clr-wizard-page>
+  </clr-wizard>
+</div>
